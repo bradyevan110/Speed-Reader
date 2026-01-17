@@ -317,12 +317,13 @@
             font-family: 'Courier New', Courier, monospace;
             position: relative;
             overflow: visible;
+            width: 100%;
         }
 
         .word-display .word-content {
             position: relative;
             display: inline-block;
-            text-align: center;
+            white-space: nowrap;
         }
 
         .word-display.empty {
@@ -578,6 +579,8 @@
         function updateFontSizeDisplay() {
             fontSizeValue.textContent = fontSizeSlider.value + 'px';
             wordDisplay.style.fontSize = fontSizeSlider.value + 'px';
+            // Reset focal point position so it recalculates with new font size
+            FIXED_FOCAL_POSITION = null;
             // Re-display current word to recalculate alignment with new font size
             if (words.length > 0 && currentIndex < words.length) {
                 displayWord();
@@ -681,6 +684,9 @@
             readingTimeStat.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
+        // Fixed focal point position - this will be set to the center of the display area
+        let FIXED_FOCAL_POSITION = null;
+
         // Calculate which letter in the word should be the focal point (closest to midpoint)
         function getFocalPointIndex(word) {
             if (word.length <= 1) return 0;
@@ -689,8 +695,16 @@
             return Math.floor((word.length - 1) / 2);
         }
 
-        // Display current word with red focal point letter
-        // Words stay centered in a fixed position, red letter is near the midpoint of each word
+        // Initialize the fixed focal point position (center of display area)
+        function initializeFocalPoint() {
+            if (FIXED_FOCAL_POSITION === null) {
+                const rect = wordDisplay.getBoundingClientRect();
+                // Set focal point to the horizontal center of the display area
+                FIXED_FOCAL_POSITION = rect.left + (rect.width / 2);
+            }
+        }
+
+        // Display current word with red focal point letter at EXACTLY the same pixel position
         function displayWord() {
             if (currentIndex >= words.length) {
                 wordDisplay.textContent = 'Finished!';
@@ -712,12 +726,41 @@
             const afterFocal = word.substring(focalIndex + 1);
             
             // Create HTML with red focal point letter
-            // Word is centered normally using flexbox, no transforms or shifting
-            const wordHTML = beforeFocal + '<span style="color: #ff0000; font-weight: 900;">' + focalLetter + '</span>' + afterFocal;
+            // Use separate spans so we can measure their positions accurately
+            const wordHTML = '<span class="word-before">' + beforeFocal + '</span>' +
+                           '<span class="word-focal" style="color: #ff0000; font-weight: 900;">' + focalLetter + '</span>' +
+                           '<span class="word-after">' + afterFocal + '</span>';
             
-            // Display word centered - it stays in the same position, only the red letter changes
+            // Display word initially (will be repositioned immediately after)
             wordDisplay.innerHTML = '<span class="word-content">' + wordHTML + '</span>';
             wordDisplay.classList.remove('empty');
+            
+            // Initialize focal point position if not set
+            initializeFocalPoint();
+            
+            // Use requestAnimationFrame to ensure DOM is updated before measuring
+            requestAnimationFrame(() => {
+                // Get references to the spans
+                const wordContent = wordDisplay.querySelector('.word-content');
+                const beforeSpan = wordDisplay.querySelector('.word-before');
+                const focalSpan = wordDisplay.querySelector('.word-focal');
+                
+                if (!wordContent || !beforeSpan || !focalSpan) return;
+                
+                // Measure actual pixel positions
+                const wordContentRect = wordContent.getBoundingClientRect();
+                const focalSpanRect = focalSpan.getBoundingClientRect();
+                
+                // Calculate the center of the focal point letter
+                const focalCenter = focalSpanRect.left + (focalSpanRect.width / 2);
+                
+                // Calculate how much we need to shift the word to align focal point to fixed position
+                const shiftX = FIXED_FOCAL_POSITION - focalCenter;
+                
+                // Apply the transform to shift the word
+                wordContent.style.transform = `translateX(${shiftX}px)`;
+            });
+            
             updateProgress();
             updateReadingTime();
         }
@@ -910,6 +953,14 @@
             }
         });
 
+        // Handle window resize - recalculate focal point position
+        window.addEventListener('resize', () => {
+            FIXED_FOCAL_POSITION = null;
+            if (words.length > 0 && currentIndex < words.length) {
+                displayWord();
+            }
+        });
+
         // Initialize display
         updateSpeedDisplay();
         updateFontSizeDisplay();
@@ -918,4 +969,3 @@
     </script>
 </body>
 </html>
-
