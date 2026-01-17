@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Reader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .input-section h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+
+        .file-upload {
+            margin-bottom: 20px;
+        }
+
+        .file-upload label {
+            display: block;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .file-upload label:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+
+        .text-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .controls-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .controls-section h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95em;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: right;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .color-picker {
+            width: 60px;
+            height: 40px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reader-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .word-display {
+            font-size: 72px;
+            font-weight: 700;
+            color: #333;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            user-select: none;
+            line-height: 1.2;
+            padding: 20px;
+            word-break: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
+            overflow: visible;
+        }
+
+        .word-display .word-content {
+            position: relative;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .word-display.empty {
+            color: #adb5bd;
+            font-size: 1.5em;
+            font-weight: 400;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .keyboard-hints {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .keyboard-hints h3 {
+            font-size: 1em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .keyboard-hints p {
+            font-size: 0.85em;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .keyboard-hints kbd {
+            background: #667eea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Speed Reader</h1>
+            <p>Read faster with focused word-by-word presentation</p>
+        </div>
+
+        <div class="content">
+            <div class="left-panel">
+                <div class="input-section">
+                    <h2>📄 Input Text</h2>
+                    <div class="file-upload">
+                        <label for="pdf-upload">
+                            📎 Upload PDF File
+                        </label>
+                        <input type="file" id="pdf-upload" accept="application/pdf">
+                        <div class="file-name" id="file-name">No file selected</div>
+                    </div>
+                    <textarea 
+                        id="text-input" 
+                        class="text-input" 
+                        placeholder="Or paste your text here..."
+                    ></textarea>
+                    <div class="info-text">
+                        Upload a PDF or paste text to get started
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    <h2>⚙️ Settings</h2>
+                    
+                    <div class="control-group">
+                        <label for="speed-slider">Reading Speed (Words Per Minute)</label>
+                        <div class="slider-container">
+                            <input 
+                                type="range" 
+                                id="speed-slider" 
+                                class="slider" 
+                                min="50" 
+                                max="1000" 
+                                value="300"
+                            >
+                            <span class="slider-value" id="speed-value">300 WPM</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="font-size-slider">Word Size</label>
+                        <div class="slider-container">
+                            <input 
+                                type="range" 
+                                id="font-size-slider" 
+                                class="slider" 
+                                min="24" 
+                                max="120" 
+                                value="72"
+                            >
+                            <span class="slider-value" id="font-size-value">72px</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="word-color">Word Color</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="word-color" class="color-picker" value="#333333">
+                            <span id="word-color-value">#333333</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="bg-color">Background Color</label>
+                        <div class="color-picker-container">
+                            <input type="color" id="bg-color" class="color-picker" value="#ffffff">
+                            <span id="bg-color-value">#ffffff</span>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="start-btn" class="btn btn-success">▶ Start</button>
+                        <button id="pause-btn" class="btn btn-secondary" disabled>⏸ Pause</button>
+                        <button id="reset-btn" class="btn btn-danger" disabled>↻ Reset</button>
+                    </div>
+
+                    <div class="keyboard-hints">
+                        <h3>⌨️ Keyboard Shortcuts</h3>
+                        <p>
+                            <kbd>Space</kbd> - Pause/Resume | 
+                            <kbd>←</kbd> - Previous word | 
+                            <kbd>→</kbd> - Next word | 
+                            <kbd>+</kbd> - Faster | 
+                            <kbd>-</kbd> - Slower
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reader-section">
+                <div id="word-display" class="word-display empty">
+                    Ready to read
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="current-word">0</div>
+                        <div class="stat-label">Current Word</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-words">0</div>
+                        <div class="stat-label">Total Words</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="reading-time">0:00</div>
+                        <div class="stat-label">Time Remaining</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF.js library from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <script>
+        // Set up PDF.js worker
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // Application state
+        let words = [];
+        let currentIndex = 0;
+        let intervalId = null;
+        let isPaused = false;
+        let startTime = null;
+        let pausedTime = 0;
+        let totalPausedTime = 0;
+
+        // DOM elements
+        const wordDisplay = document.getElementById('word-display');
+        const textInput = document.getElementById('text-input');
+        const pdfUpload = document.getElementById('pdf-upload');
+        const fileName = document.getElementById('file-name');
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        const fontSizeSlider = document.getElementById('font-size-slider');
+        const fontSizeValue = document.getElementById('font-size-value');
+        const wordColor = document.getElementById('word-color');
+        const wordColorValue = document.getElementById('word-color-value');
+        const bgColor = document.getElementById('bg-color');
+        const bgColorValue = document.getElementById('bg-color-value');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const progressFill = document.getElementById('progress-fill');
+        const currentWordStat = document.getElementById('current-word');
+        const totalWordsStat = document.getElementById('total-words');
+        const readingTimeStat = document.getElementById('reading-time');
+
+        // Initialize settings
+        function updateSpeedDisplay() {
+            speedValue.textContent = speedSlider.value + ' WPM';
+        }
+
+        function updateFontSizeDisplay() {
+            fontSizeValue.textContent = fontSizeSlider.value + 'px';
+            wordDisplay.style.fontSize = fontSizeSlider.value + 'px';
+            // Re-display current word to recalculate alignment with new font size
+            if (words.length > 0 && currentIndex < words.length) {
+                displayWord();
+            }
+        }
+
+        function updateWordColor() {
+            wordColorValue.textContent = wordColor.value;
+            wordDisplay.style.color = wordColor.value;
+        }
+
+        function updateBgColor() {
+            bgColorValue.textContent = bgColor.value;
+            document.querySelector('.reader-section').style.backgroundColor = bgColor.value;
+        }
+
+        // Event listeners for settings
+        speedSlider.addEventListener('input', () => {
+            updateSpeedDisplay();
+            if (intervalId && !isPaused) {
+                restartReading();
+            }
+        });
+
+        fontSizeSlider.addEventListener('input', updateFontSizeDisplay);
+        wordColor.addEventListener('input', updateWordColor);
+        bgColor.addEventListener('input', updateBgColor);
+
+        // Load text from PDF
+        async function loadPDF(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let fullText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    fullText += textContent.items.map(item => item.str).join(' ') + ' ';
+                }
+
+                return fullText.trim();
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                alert('Error loading PDF. Please make sure it\'s a valid PDF file.');
+                return null;
+            }
+        }
+
+        // Process text into words
+        function processText(text) {
+            if (!text || text.trim() === '') {
+                return [];
+            }
+            // Split by whitespace and filter out empty strings
+            return text.split(/\s+/).filter(word => word.length > 0);
+        }
+
+        // Load text from input
+        async function loadText() {
+            let text = '';
+
+            if (pdfUpload.files.length > 0) {
+                text = await loadPDF(pdfUpload.files[0]);
+                if (!text) return false;
+            } else if (textInput.value.trim()) {
+                text = textInput.value.trim();
+            } else {
+                alert('Please upload a PDF file or paste some text.');
+                return false;
+            }
+
+            words = processText(text);
+            totalWordsStat.textContent = words.length;
+            currentIndex = 0;
+            updateProgress();
+            return true;
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            if (words.length === 0) {
+                progressFill.style.width = '0%';
+                return;
+            }
+            const progress = (currentIndex / words.length) * 100;
+            progressFill.style.width = progress + '%';
+            currentWordStat.textContent = currentIndex;
+        }
+
+        // Calculate remaining time
+        function updateReadingTime() {
+            if (words.length === 0 || currentIndex >= words.length) {
+                readingTimeStat.textContent = '0:00';
+                return;
+            }
+            const remainingWords = words.length - currentIndex;
+            const wpm = parseInt(speedSlider.value);
+            const minutes = Math.floor(remainingWords / wpm);
+            const seconds = Math.floor((remainingWords % wpm) / wpm * 60);
+            readingTimeStat.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Calculate which letter in the word should be the focal point (closest to midpoint)
+        function getFocalPointIndex(word) {
+            if (word.length <= 1) return 0;
+            // For all words, use the letter closest to the midpoint
+            // This keeps the focal point as stable as possible while being near the word's center
+            return Math.floor((word.length - 1) / 2);
+        }
+
+        // Display current word with red focal point letter
+        // Words stay centered in a fixed position, red letter is near the midpoint of each word
+        function displayWord() {
+            if (currentIndex >= words.length) {
+                wordDisplay.textContent = 'Finished!';
+                wordDisplay.classList.add('empty');
+                clearInterval(intervalId);
+                intervalId = null;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                resetBtn.disabled = false;
+                return;
+            }
+
+            const word = words[currentIndex];
+            const focalIndex = getFocalPointIndex(word);
+            
+            // Split word into parts: before focal point, focal point letter, after focal point
+            const beforeFocal = word.substring(0, focalIndex);
+            const focalLetter = word.substring(focalIndex, focalIndex + 1);
+            const afterFocal = word.substring(focalIndex + 1);
+            
+            // Create HTML with red focal point letter
+            // Word is centered normally using flexbox, no transforms or shifting
+            const wordHTML = beforeFocal + '<span style="color: #ff0000; font-weight: 900;">' + focalLetter + '</span>' + afterFocal;
+            
+            // Display word centered - it stays in the same position, only the red letter changes
+            wordDisplay.innerHTML = '<span class="word-content">' + wordHTML + '</span>';
+            wordDisplay.classList.remove('empty');
+            updateProgress();
+            updateReadingTime();
+        }
+
+        // Start reading
+        async function startReading() {
+            if (words.length === 0) {
+                const loaded = await loadText();
+                if (!loaded) return;
+            }
+
+            if (words.length === 0) {
+                alert('No text to read. Please upload a PDF or paste some text.');
+                return;
+            }
+
+            if (currentIndex >= words.length) {
+                currentIndex = 0;
+            }
+
+            isPaused = false;
+            startTime = Date.now();
+            totalPausedTime = 0;
+            pausedTime = 0;
+
+            const wpm = parseInt(speedSlider.value);
+            const msPerWord = (60 / wpm) * 1000;
+
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            resetBtn.disabled = false;
+
+            displayWord();
+            intervalId = setInterval(() => {
+                currentIndex++;
+                displayWord();
+            }, msPerWord);
+        }
+
+        // Pause reading
+        function pauseReading() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+                isPaused = true;
+                pausedTime = Date.now();
+                pauseBtn.textContent = '▶ Resume';
+            } else if (isPaused) {
+                // Resume
+                isPaused = false;
+                if (pausedTime) {
+                    totalPausedTime += Date.now() - pausedTime;
+                    pausedTime = 0;
+                }
+
+                const wpm = parseInt(speedSlider.value);
+                const msPerWord = (60 / wpm) * 1000;
+
+                pauseBtn.textContent = '⏸ Pause';
+                displayWord();
+                intervalId = setInterval(() => {
+                    currentIndex++;
+                    displayWord();
+                }, msPerWord);
+            }
+        }
+
+        // Restart reading with new speed
+        function restartReading() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                const wpm = parseInt(speedSlider.value);
+                const msPerWord = (60 / wpm) * 1000;
+                intervalId = setInterval(() => {
+                    currentIndex++;
+                    displayWord();
+                }, msPerWord);
+            }
+        }
+
+        // Reset reading
+        function resetReading() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            currentIndex = 0;
+            isPaused = false;
+            pausedTime = 0;
+            totalPausedTime = 0;
+            wordDisplay.textContent = 'Ready to read';
+            wordDisplay.classList.add('empty');
+            updateProgress();
+            updateReadingTime();
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            pauseBtn.textContent = '⏸ Pause';
+            resetBtn.disabled = words.length === 0;
+        }
+
+        // Navigate words
+        function previousWord() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                displayWord();
+            }
+        }
+
+        function nextWord() {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                displayWord();
+            }
+        }
+
+        // Adjust speed
+        function increaseSpeed() {
+            const currentSpeed = parseInt(speedSlider.value);
+            const newSpeed = Math.min(1000, currentSpeed + 50);
+            speedSlider.value = newSpeed;
+            updateSpeedDisplay();
+            if (intervalId && !isPaused) {
+                restartReading();
+            }
+        }
+
+        function decreaseSpeed() {
+            const currentSpeed = parseInt(speedSlider.value);
+            const newSpeed = Math.max(50, currentSpeed - 50);
+            speedSlider.value = newSpeed;
+            updateSpeedDisplay();
+            if (intervalId && !isPaused) {
+                restartReading();
+            }
+        }
+
+        // Button event listeners
+        startBtn.addEventListener('click', startReading);
+        pauseBtn.addEventListener('click', pauseReading);
+        resetBtn.addEventListener('click', resetReading);
+
+        // PDF upload handler
+        pdfUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileName.textContent = e.target.files[0].name;
+                textInput.value = '';
+            } else {
+                fileName.textContent = 'No file selected';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Prevent shortcuts when typing in textarea
+            if (e.target === textInput) {
+                return;
+            }
+
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (intervalId || isPaused) {
+                        pauseReading();
+                    } else if (words.length > 0) {
+                        startReading();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (words.length > 0) {
+                        previousWord();
+                    }
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (words.length > 0) {
+                        nextWord();
+                    }
+                    break;
+                case '+':
+                case '=':
+                    e.preventDefault();
+                    increaseSpeed();
+                    break;
+                case '-':
+                case '_':
+                    e.preventDefault();
+                    decreaseSpeed();
+                    break;
+            }
+        });
+
+        // Initialize display
+        updateSpeedDisplay();
+        updateFontSizeDisplay();
+        updateWordColor();
+        updateBgColor();
+    </script>
+</body>
+</html>
+
