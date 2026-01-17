@@ -115,7 +115,6 @@ If you want to extend this application, here are some ideas:
 
 - Built with vanilla JavaScript, HTML, and CSS
 - PDF parsing powered by [PDF.js](https://mozilla.github.io/pdf.js/) by Mozilla
-- Modern UI design with gradient backgrounds and smooth animations
 
 ## License
 
